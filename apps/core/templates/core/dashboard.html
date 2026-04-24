@@ -1,0 +1,103 @@
+{% extends 'base.html' %}
+{% block title %}Dashboard{% endblock %}
+{% block page_title %}Dashboard{% endblock %}
+
+{% block content %}
+<!-- KPIs -->
+<div class="row g-3 mb-4">
+  <div class="col-6 col-lg-3">
+    <div class="kpi-card bg-white">
+      <div class="kpi-icon" style="background:#EEF4FF">
+        <i class="bi bi-clipboard2-check" style="color:#2E75B6"></i>
+      </div>
+      <div>
+        <div class="kpi-num" style="color:#2E75B6">{{ total_os }}</div>
+        <div class="kpi-label">Total de OS</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-6 col-lg-3">
+    <div class="kpi-card bg-white">
+      <div class="kpi-icon" style="background:#FFFDE7">
+        <i class="bi bi-hourglass-split" style="color:#F9A825"></i>
+      </div>
+      <div>
+        <div class="kpi-num" style="color:#F9A825">{{ em_andamento }}</div>
+        <div class="kpi-label">Em andamento</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-6 col-lg-3">
+    <div class="kpi-card bg-white">
+      <div class="kpi-icon" style="background:#FFF3E0">
+        <i class="bi bi-box-seam" style="color:#ED7D31"></i>
+      </div>
+      <div>
+        <div class="kpi-num" style="color:#ED7D31">{{ aguardando }}</div>
+        <div class="kpi-label">Aguardando peça</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-6 col-lg-3">
+    <div class="kpi-card bg-white">
+      <div class="kpi-icon" style="background:#E8F5E9">
+        <i class="bi bi-check-circle" style="color:#375623"></i>
+      </div>
+      <div>
+        <div class="kpi-num" style="color:#375623">{{ concluidas }}</div>
+        <div class="kpi-label">Concluídas</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Últimas OS -->
+<div class="card border-0 shadow-sm">
+  <div class="card-header d-flex align-items-center justify-content-between"
+       style="background:#1F3864; border-radius:10px 10px 0 0;">
+    <span class="text-white fw-semibold"><i class="bi bi-clock-history me-2"></i>Últimas Ordens de Serviço</span>
+    <a href="{% url 'lista_ordens' %}" class="btn btn-sm btn-orange">Ver todas</a>
+  </div>
+  <div class="card-body p-0">
+    <div class="table-responsive">
+      <table class="table table-oficina mb-0">
+        <thead>
+          <tr>
+            <th>Nº OS</th><th>Cliente</th><th>Veículo</th><th>Placa</th>
+            <th>Entrada</th><th>Status</th><th></th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for os in ultimas_ordens %}
+          <tr>
+            <td><strong>{{ os.numero_os|default:os.pk }}</strong></td>
+            <td>{{ os.cliente.nome }}</td>
+            <td>{{ os.veiculo.descricao }}</td>
+            <td>{{ os.veiculo.placa }}</td>
+            <td>{{ os.data_entrada|date:"d/m/Y H:i" }}</td>
+            <td>
+              {% if os.status == 'Concluído' %}
+                <span class="badge-status status-concluido">{{ os.status }}</span>
+              {% elif os.status == 'Em andamento' %}
+                <span class="badge-status status-andamento">{{ os.status }}</span>
+              {% elif os.status == 'Aguardando peça' %}
+                <span class="badge-status status-aguardando">{{ os.status }}</span>
+              {% else %}
+                <span class="badge-status status-cancelado">{{ os.status }}</span>
+              {% endif %}
+            </td>
+            <td>
+              <a href="{% url 'detalhe_ordem' os.pk %}" class="btn btn-sm btn-primary-of">
+                <i class="bi bi-eye"></i>
+              </a>
+            </td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="7" class="text-center text-muted py-4">Nenhuma OS cadastrada</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

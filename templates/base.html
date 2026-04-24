@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Oficina{% endblock %} — Sistema de Gestão</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+  <style>
+    :root {
+      --azul-escuro: #1F3864;
+      --azul-medio:  #2E75B6;
+      --azul-claro:  #BDD7EE;
+      --laranja:     #ED7D31;
+      --verde:       #375623;
+      --sidebar-w:   240px;
+    }
+
+    body { background: #f4f6f9; font-family: 'Segoe UI', sans-serif; }
+
+    /* ── Sidebar ── */
+    #sidebar {
+      position: fixed; top: 0; left: 0; height: 100vh;
+      width: var(--sidebar-w); background: var(--azul-escuro);
+      display: flex; flex-direction: column;
+      z-index: 1000; transition: width .25s;
+    }
+    #sidebar .brand {
+      padding: 1.2rem 1rem;
+      border-bottom: 1px solid rgba(255,255,255,.1);
+      color: #fff; font-size: 1.1rem; font-weight: 700;
+      display: flex; align-items: center; gap: .6rem;
+    }
+    #sidebar .brand i { font-size: 1.4rem; color: var(--laranja); }
+
+    #sidebar nav a {
+      display: flex; align-items: center; gap: .7rem;
+      padding: .65rem 1.2rem; color: rgba(255,255,255,.75);
+      text-decoration: none; font-size: .9rem;
+      border-left: 3px solid transparent;
+      transition: all .2s;
+    }
+    #sidebar nav a:hover,
+    #sidebar nav a.active {
+      background: rgba(255,255,255,.08);
+      color: #fff; border-left-color: var(--laranja);
+    }
+    #sidebar nav a i { font-size: 1.1rem; width: 20px; }
+    #sidebar .section-label {
+      font-size: .7rem; text-transform: uppercase; letter-spacing: .1em;
+      color: rgba(255,255,255,.35); padding: .9rem 1.2rem .3rem;
+    }
+    #sidebar .logout-area {
+      margin-top: auto;
+      border-top: 1px solid rgba(255,255,255,.1);
+      padding: .5rem 0;
+    }
+
+    /* ── Main content ── */
+    #main {
+      margin-left: var(--sidebar-w);
+      min-height: 100vh;
+      display: flex; flex-direction: column;
+    }
+    #topbar {
+      background: #fff;
+      border-bottom: 1px solid #e0e4ea;
+      padding: .75rem 1.5rem;
+      display: flex; align-items: center; justify-content: space-between;
+      position: sticky; top: 0; z-index: 900;
+    }
+    #topbar .page-title { font-size: 1.1rem; font-weight: 600; color: var(--azul-escuro); }
+    #content { padding: 1.5rem; flex: 1; }
+
+    /* ── Cards de KPI ── */
+    .kpi-card {
+      border: none; border-radius: 12px;
+      padding: 1.25rem 1.5rem;
+      display: flex; align-items: center; gap: 1rem;
+      box-shadow: 0 1px 6px rgba(0,0,0,.06);
+    }
+    .kpi-card .kpi-icon {
+      width: 52px; height: 52px; border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.5rem; flex-shrink: 0;
+    }
+    .kpi-card .kpi-num  { font-size: 1.8rem; font-weight: 700; line-height: 1; }
+    .kpi-card .kpi-label { font-size: .78rem; color: #6b7280; margin-top: 2px; }
+
+    /* ── Status badges ── */
+    .badge-status { font-size: .78rem; padding: .35em .75em; border-radius: 20px; font-weight: 600; }
+    .status-concluido     { background:#C6EFCE; color:#375623; }
+    .status-andamento     { background:#FFEB9C; color:#7d4900; }
+    .status-aguardando    { background:#FFC7CE; color:#9C0006; }
+    .status-cancelado     { background:#E9ECEF; color:#6c757d; }
+
+    /* ── Table ── */
+    .table-oficina thead th {
+      background: var(--azul-escuro); color: #fff; font-weight: 500;
+      font-size: .85rem; border: none; padding: .75rem 1rem;
+    }
+    .table-oficina tbody tr:hover { background: #f0f4ff; }
+    .table-oficina td { vertical-align: middle; font-size: .88rem; padding: .65rem 1rem; }
+
+    /* ── Buttons ── */
+    .btn-primary-of   { background: var(--azul-medio); border: none; color: #fff; }
+    .btn-primary-of:hover { background: var(--azul-escuro); color: #fff; }
+    .btn-orange       { background: var(--laranja); border: none; color: #fff; }
+    .btn-orange:hover { background: #c9621a; color: #fff; }
+
+    /* ── Formset inline card ── */
+    .formset-item {
+      background: #fff; border: 1px solid #dee2e6;
+      border-radius: 10px; padding: 1rem; margin-bottom: .75rem;
+      position: relative;
+    }
+    .formset-item .btn-remove {
+      position: absolute; top: .5rem; right: .5rem;
+    }
+
+    /* ── Responsive ── */
+    @media (max-width: 768px) {
+      :root { --sidebar-w: 0px; }
+      #sidebar { transform: translateX(-240px); }
+      #sidebar.open { transform: translateX(0); width: 240px; }
+      #main { margin-left: 0; }
+    }
+  </style>
+  {% block extra_head %}{% endblock %}
+</head>
+<body>
+
+<!-- Sidebar -->
+<aside id="sidebar">
+  <div class="brand">
+    <i class="bi bi-wrench-adjustable-circle-fill"></i>
+    Oficina Pro
+  </div>
+  <nav>
+    <div class="section-label">Principal</div>
+    <a href="{% url 'dashboard' %}" class="{% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">
+      <i class="bi bi-speedometer2"></i> Dashboard
+    </a>
+
+    <div class="section-label">Ordens de Serviço</div>
+    <a href="{% url 'lista_ordens' %}" class="{% if 'ordem' in request.resolver_match.url_name %}active{% endif %}">
+      <i class="bi bi-clipboard2-check"></i> Todas as OS
+    </a>
+    <a href="{% url 'nova_ordem' %}">
+      <i class="bi bi-plus-circle"></i> Nova OS
+    </a>
+
+    <div class="section-label">Cadastros</div>
+    <a href="{% url 'lista_clientes' %}" class="{% if 'cliente' in request.resolver_match.url_name %}active{% endif %}">
+      <i class="bi bi-people"></i> Clientes
+    </a>
+    <a href="{% url 'novo_veiculo' %}">
+      <i class="bi bi-car-front"></i> Novo Veículo
+    </a>
+    <a href="{% url 'novo_cliente' %}">
+      <i class="bi bi-person-plus"></i> Novo Cliente
+    </a>
+  </nav>
+  <div class="logout-area">
+    <a href="{% url 'logout' %}"><i class="bi bi-box-arrow-left"></i> Sair</a>
+  </div>
+</aside>
+
+<!-- Main -->
+<div id="main">
+  <div id="topbar">
+    <button class="btn btn-sm d-md-none me-2" onclick="document.getElementById('sidebar').classList.toggle('open')">
+      <i class="bi bi-list fs-5"></i>
+    </button>
+    <span class="page-title">{% block page_title %}{% endblock %}</span>
+    <span class="text-muted small">
+      <i class="bi bi-person-circle me-1"></i>{{ request.user.get_full_name|default:request.user.username }}
+    </span>
+  </div>
+
+  <div id="content">
+    {% for msg in messages %}
+    <div class="alert alert-{{ msg.tags|default:'info' }} alert-dismissible fade show" role="alert">
+      {{ msg }}<button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    {% endfor %}
+
+    {% block content %}{% endblock %}
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+{% block extra_js %}{% endblock %}
+</body>
+</html>

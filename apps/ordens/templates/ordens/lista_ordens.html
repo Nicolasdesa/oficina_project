@@ -1,0 +1,80 @@
+{% extends 'base.html' %}
+{% block title %}Ordens de Serviço{% endblock %}
+{% block page_title %}Ordens de Serviço{% endblock %}
+
+{% block content %}
+<div class="card border-0 shadow-sm mb-3">
+  <div class="card-body">
+    <form method="get" class="row g-2 align-items-end">
+      <div class="col-md-5">
+        <label class="form-label small fw-semibold mb-1">Buscar</label>
+        <input name="q" type="text" class="form-control" placeholder="Cliente, placa ou serviço..." value="{{ q }}">
+      </div>
+      <div class="col-md-3">
+        <label class="form-label small fw-semibold mb-1">Status</label>
+        <select name="status" class="form-select">
+          <option value="">Todos</option>
+          {% for val, label in status_choices %}
+          <option value="{{ val }}" {% if val == status_filtro %}selected{% endif %}>{{ label }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-md-2">
+        <button class="btn btn-primary-of w-100"><i class="bi bi-search me-1"></i>Filtrar</button>
+      </div>
+      <div class="col-md-2">
+        <a href="{% url 'nova_ordem' %}" class="btn btn-orange w-100">
+          <i class="bi bi-plus-lg me-1"></i>Nova OS
+        </a>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="card border-0 shadow-sm">
+  <div class="card-body p-0">
+    <div class="table-responsive">
+      <table class="table table-oficina mb-0">
+        <thead>
+          <tr>
+            <th>Nº OS</th><th>Cliente</th><th>Veículo</th><th>Placa</th>
+            <th>Entrada</th><th>Saída</th><th>Status</th>
+            <th>Total (R$)</th><th class="text-center">Ações</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for os in ordens %}
+          <tr>
+            <td><strong>{{ os.numero_os|default:os.pk }}</strong></td>
+            <td>{{ os.cliente.nome }}</td>
+            <td>{{ os.veiculo.descricao }}</td>
+            <td>{{ os.veiculo.placa }}</td>
+            <td>{{ os.data_entrada|date:"d/m/Y" }}</td>
+            <td>{{ os.data_saida|date:"d/m/Y"|default:"—" }}</td>
+            <td>
+              {% if os.status == 'Concluído' %}<span class="badge-status status-concluido">{{ os.status }}</span>
+              {% elif os.status == 'Em andamento' %}<span class="badge-status status-andamento">{{ os.status }}</span>
+              {% elif os.status == 'Aguardando peça' %}<span class="badge-status status-aguardando">{{ os.status }}</span>
+              {% else %}<span class="badge-status status-cancelado">{{ os.status }}</span>{% endif %}
+            </td>
+            <td class="fw-semibold">R$ {{ os.total_geral|floatformat:2 }}</td>
+            <td class="text-center">
+              <a href="{% url 'detalhe_ordem' os.pk %}" class="btn btn-sm btn-primary-of" title="Ver">
+                <i class="bi bi-eye"></i></a>
+              <a href="{% url 'imprimir_os_pdf' os.pk %}" class="btn btn-sm btn-orange" title="PDF" target="_blank">
+                <i class="bi bi-printer"></i></a>
+              <a href="{% url 'editar_ordem' os.pk %}" class="btn btn-sm btn-outline-secondary" title="Editar">
+                <i class="bi bi-pencil"></i></a>
+            </td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="9" class="text-center text-muted py-5">
+            <i class="bi bi-inbox fs-2 d-block mb-2"></i>Nenhuma OS encontrada
+          </td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

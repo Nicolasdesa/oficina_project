@@ -1,0 +1,75 @@
+{% extends 'base.html' %}
+{% block title %}Usuários{% endblock %}
+{% block page_title %}Usuários do Sistema{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-end mb-3">
+  <a href="{% url 'novo_usuario' %}" class="btn btn-orange btn-sm">
+    <i class="bi bi-person-plus me-1"></i>Novo Usuário
+  </a>
+</div>
+
+<div class="card border-0 shadow-sm">
+  <div class="card-body p-0">
+    <div class="table-responsive">
+      <table class="table table-oficina mb-0">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Usuário</th>
+            <th>Nome Completo</th>
+            <th>E-mail</th>
+            <th>Perfil</th>
+            <th>Último Login</th>
+            <th>Status</th>
+            <th class="text-center">Ações</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for u in usuarios %}
+          <tr>
+            <td class="text-muted">{{ u.pk }}</td>
+            <td><strong>{{ u.username }}</strong></td>
+            <td>{{ u.nome_completo }}</td>
+            <td>{{ u.email|default:"—" }}</td>
+            <td>
+              {% if u.perfil == 'admin' %}
+                <span class="badge" style="background:#1F3864">Admin</span>
+              {% elif u.perfil == 'gerente' %}
+                <span class="badge" style="background:#2E75B6">Gerente</span>
+              {% else %}
+                <span class="badge bg-secondary">Operador</span>
+              {% endif %}
+            </td>
+            <td>{{ u.ultimo_login|date:"d/m/Y H:i"|default:"Nunca" }}</td>
+            <td>
+              {% if u.ativo %}
+                <span class="badge-status status-concluido">Ativo</span>
+              {% else %}
+                <span class="badge-status status-cancelado">Inativo</span>
+              {% endif %}
+            </td>
+            <td class="text-center">
+              <a href="{% url 'editar_usuario' u.pk %}" class="btn btn-sm btn-primary-of" title="Editar">
+                <i class="bi bi-pencil"></i>
+              </a>
+              {% if u.pk != request.user.id %}
+              <a href="{% url 'excluir_usuario' u.pk %}" class="btn btn-sm btn-outline-danger" title="Excluir">
+                <i class="bi bi-trash"></i>
+              </a>
+              {% endif %}
+            </td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="8" class="text-center text-muted py-5">
+              <i class="bi bi-people fs-2 d-block mb-2"></i>Nenhum usuário cadastrado
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Login — Oficina Pro</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+  <style>
+    body {
+      min-height: 100vh;
+      background: linear-gradient(135deg, #1F3864 0%, #2E75B6 65%, #1a2e50 100%);
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'Segoe UI', sans-serif;
+    }
+    .card-login {
+      background: #fff; border-radius: 20px;
+      padding: 2.5rem 2rem; width: 100%; max-width: 420px;
+      box-shadow: 0 24px 64px rgba(0,0,0,.35);
+    }
+    .brand-icon {
+      width: 68px; height: 68px; background: #1F3864;
+      border-radius: 18px; display: flex; align-items: center;
+      justify-content: center; margin: 0 auto 1rem;
+    }
+    .brand-icon i { font-size: 2.2rem; color: #ED7D31; }
+    .form-control:focus {
+      border-color: #2E75B6;
+      box-shadow: 0 0 0 .2rem rgba(46,117,182,.2);
+    }
+    .btn-entrar {
+      background: #ED7D31; border: none; color: #fff;
+      font-weight: 600; padding: .8rem; border-radius: 10px;
+      font-size: 1rem; transition: background .2s;
+    }
+    .btn-entrar:hover { background: #c9621a; color: #fff; }
+    .input-group-text { background: #f8f9fa; border-right: none; }
+    .input-group .form-control { border-left: none; }
+  </style>
+</head>
+<body>
+<div class="card-login">
+  <div class="brand-icon">
+    <i class="bi bi-wrench-adjustable-circle-fill"></i>
+  </div>
+  <h4 class="text-center fw-bold mb-1" style="color:#1F3864">Oficina Pro</h4>
+  <p class="text-center text-muted small mb-4">Informe suas credenciais para entrar</p>
+
+  {% for msg in messages %}
+  <div class="alert alert-{{ msg.tags|default:'danger' }} py-2 small alert-dismissible">
+    <i class="bi bi-exclamation-circle me-1"></i>{{ msg }}
+    <button type="button" class="btn-close btn-sm" data-bs-dismiss="alert"></button>
+  </div>
+  {% endfor %}
+
+  <form method="post" novalidate>
+    {% csrf_token %}
+    <input type="hidden" name="next" value="{{ request.GET.next }}">
+
+    <div class="mb-3">
+      <label class="form-label fw-semibold small">Usuário</label>
+      <div class="input-group">
+        <span class="input-group-text"><i class="bi bi-person text-muted"></i></span>
+        {{ form.username }}
+      </div>
+      {% if form.username.errors %}
+      <div class="text-danger small mt-1">{{ form.username.errors }}</div>
+      {% endif %}
+    </div>
+
+    <div class="mb-4">
+      <label class="form-label fw-semibold small">Senha</label>
+      <div class="input-group">
+        <span class="input-group-text"><i class="bi bi-lock text-muted"></i></span>
+        {{ form.password }}
+        <button class="btn btn-outline-secondary" type="button" id="toggle-senha" tabindex="-1">
+          <i class="bi bi-eye" id="eye-icon"></i>
+        </button>
+      </div>
+    </div>
+
+    <button type="submit" class="btn btn-entrar w-100">
+      <i class="bi bi-box-arrow-in-right me-2"></i>Entrar
+    </button>
+  </form>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  document.getElementById('toggle-senha').addEventListener('click', function () {
+    const input = document.querySelector('input[name="password"]');
+    const icon  = document.getElementById('eye-icon');
+    if (input.type === 'password') {
+      input.type = 'text';
+      icon.className = 'bi bi-eye-slash';
+    } else {
+      input.type = 'password';
+      icon.className = 'bi bi-eye';
+    }
+  });
+</script>
+</body>
+</html>

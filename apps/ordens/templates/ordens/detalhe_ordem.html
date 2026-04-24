@@ -1,0 +1,156 @@
+{% extends 'base.html' %}
+{% block title %}{{ ordem.numero_os|default:ordem.pk }}{% endblock %}
+{% block page_title %}{{ ordem.numero_os|default:ordem.pk }}{% endblock %}
+
+{% block content %}
+<div class="d-flex gap-2 mb-3 flex-wrap">
+  <a href="{% url 'lista_ordens' %}" class="btn btn-outline-secondary btn-sm">
+    <i class="bi bi-arrow-left me-1"></i>Voltar
+  </a>
+  <a href="{% url 'editar_ordem' ordem.pk %}" class="btn btn-primary-of btn-sm">
+    <i class="bi bi-pencil me-1"></i>Editar
+  </a>
+  <a href="{% url 'imprimir_os_pdf' ordem.pk %}" class="btn btn-orange btn-sm" target="_blank">
+    <i class="bi bi-printer me-1"></i>Imprimir PDF
+  </a>
+  <a href="{% url 'excluir_ordem' ordem.pk %}" class="btn btn-outline-danger btn-sm ms-auto">
+    <i class="bi bi-trash me-1"></i>Excluir
+  </a>
+</div>
+
+<div class="row g-3">
+  <!-- Dados gerais -->
+  <div class="col-lg-8">
+    <div class="card border-0 shadow-sm mb-3">
+      <div class="card-header" style="background:#1F3864;">
+        <span class="text-white fw-semibold"><i class="bi bi-info-circle me-2"></i>Dados da OS</span>
+      </div>
+      <div class="card-body">
+        <div class="row g-3">
+          <div class="col-sm-6">
+            <div class="text-muted small">Cliente</div>
+            <div class="fw-semibold">{{ ordem.cliente.nome }}</div>
+            <div class="small text-muted">{{ ordem.cliente.telefone }}</div>
+          </div>
+          <div class="col-sm-6">
+            <div class="text-muted small">Veículo</div>
+            <div class="fw-semibold">{{ ordem.veiculo.descricao }}</div>
+            <div class="small text-muted">Placa: {{ ordem.veiculo.placa }}</div>
+          </div>
+          <div class="col-sm-4">
+            <div class="text-muted small">Entrada</div>
+            <div>{{ ordem.data_entrada|date:"d/m/Y H:i" }}</div>
+          </div>
+          <div class="col-sm-4">
+            <div class="text-muted small">Saída</div>
+            <div>{{ ordem.data_saida|date:"d/m/Y H:i"|default:"—" }}</div>
+          </div>
+          <div class="col-sm-4">
+            <div class="text-muted small">Status</div>
+            {% if ordem.status == 'Concluído' %}<span class="badge-status status-concluido">{{ ordem.status }}</span>
+            {% elif ordem.status == 'Em andamento' %}<span class="badge-status status-andamento">{{ ordem.status }}</span>
+            {% elif ordem.status == 'Aguardando peça' %}<span class="badge-status status-aguardando">{{ ordem.status }}</span>
+            {% else %}<span class="badge-status status-cancelado">{{ ordem.status }}</span>{% endif %}
+          </div>
+          <div class="col-12">
+            <div class="text-muted small">Descrição do Serviço</div>
+            <div class="p-2 rounded" style="background:#f8f9fa;">{{ ordem.descricao_servico }}</div>
+          </div>
+          {% if ordem.observacoes %}
+          <div class="col-12">
+            <div class="text-muted small">Observações</div>
+            <div class="p-2 rounded" style="background:#FFFDE7; border-left: 3px solid #F9A825;">
+              {{ ordem.observacoes }}
+            </div>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <!-- Peças -->
+    <div class="card border-0 shadow-sm mb-3">
+      <div class="card-header" style="background:#2E75B6;">
+        <span class="text-white fw-semibold"><i class="bi bi-gear me-2"></i>Peças Utilizadas</span>
+      </div>
+      <div class="card-body p-0">
+        <table class="table table-oficina mb-0">
+          <thead><tr><th>Peça</th><th>Código</th><th class="text-end">Qtd</th>
+            <th class="text-end">Unit.</th><th class="text-end">Subtotal</th></tr></thead>
+          <tbody>
+            {% for ip in ordem.itens_peca.all %}
+            <tr>
+              <td>{{ ip.peca.descricao }}</td>
+              <td>{{ ip.peca.codigo|default:"—" }}</td>
+              <td class="text-end">{{ ip.quantidade }}</td>
+              <td class="text-end">R$ {{ ip.valor_unitario|floatformat:2 }}</td>
+              <td class="text-end fw-semibold">R$ {{ ip.subtotal|floatformat:2 }}</td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="5" class="text-center text-muted py-3">Nenhuma peça registrada</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Mão de obra -->
+    <div class="card border-0 shadow-sm">
+      <div class="card-header" style="background:#2E75B6;">
+        <span class="text-white fw-semibold"><i class="bi bi-person-badge me-2"></i>Mão de Obra</span>
+      </div>
+      <div class="card-body p-0">
+        <table class="table table-oficina mb-0">
+          <thead><tr><th>Mecânico</th><th>Serviço</th><th class="text-end">Horas</th>
+            <th class="text-end">R$/Hora</th><th class="text-end">Subtotal</th></tr></thead>
+          <tbody>
+            {% for im in ordem.itens_mo.all %}
+            <tr>
+              <td>{{ im.mecanico.nome }}</td>
+              <td>{{ im.tipo_servico }}</td>
+              <td class="text-end">{{ im.horas_trabalhadas }}h</td>
+              <td class="text-end">R$ {{ im.valor_hora|floatformat:2 }}</td>
+              <td class="text-end fw-semibold">R$ {{ im.subtotal|floatformat:2 }}</td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="5" class="text-center text-muted py-3">Nenhum serviço registrado</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Totais -->
+  <div class="col-lg-4">
+    <div class="card border-0 shadow-sm sticky-top" style="top:80px">
+      <div class="card-header" style="background:#1F3864;">
+        <span class="text-white fw-semibold"><i class="bi bi-receipt me-2"></i>Resumo Financeiro</span>
+      </div>
+      <div class="card-body">
+        <div class="d-flex justify-content-between py-2 border-bottom">
+          <span class="text-muted">Total em Peças</span>
+          <span class="fw-semibold">R$ {{ ordem.total_pecas|floatformat:2 }}</span>
+        </div>
+        <div class="d-flex justify-content-between py-2 border-bottom">
+          <span class="text-muted">Total Mão de Obra</span>
+          <span class="fw-semibold">R$ {{ ordem.total_mao_obra|floatformat:2 }}</span>
+        </div>
+        <div class="d-flex justify-content-between py-3 mt-1 rounded px-2"
+             style="background:#ED7D31; color:#fff">
+          <span class="fw-bold fs-6">TOTAL GERAL</span>
+          <span class="fw-bold fs-5">R$ {{ ordem.total_geral|floatformat:2 }}</span>
+        </div>
+        <div class="mt-3 d-grid gap-2">
+          <a href="{% url 'imprimir_os_pdf' ordem.pk %}" class="btn btn-orange" target="_blank">
+            <i class="bi bi-file-earmark-pdf me-2"></i>Gerar / Imprimir PDF
+          </a>
+          <a href="{% url 'editar_ordem' ordem.pk %}" class="btn btn-primary-of">
+            <i class="bi bi-pencil me-2"></i>Editar OS
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

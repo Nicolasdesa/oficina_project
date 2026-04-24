@@ -1,0 +1,234 @@
+{% extends 'base.html' %}
+{% block title %}{{ titulo }}{% endblock %}
+{% block page_title %}{{ titulo }}{% endblock %}
+
+{% block content %}
+<form method="post" id="form-os">
+  {% csrf_token %}
+  <div class="row g-3">
+
+    <!-- Coluna principal -->
+    <div class="col-lg-8">
+
+      <!-- Dados da OS -->
+      <div class="card border-0 shadow-sm mb-3">
+        <div class="card-header" style="background:#1F3864;">
+          <span class="text-white fw-semibold"><i class="bi bi-clipboard2 me-2"></i>Dados da OS</span>
+        </div>
+        <div class="card-body">
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label class="form-label fw-semibold">Cliente *</label>
+              {{ form.cliente }}
+              {% if form.cliente.errors %}<div class="text-danger small">{{ form.cliente.errors }}</div>{% endif %}
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-semibold">Veículo *</label>
+              {{ form.veiculo }}
+              {% if form.veiculo.errors %}<div class="text-danger small">{{ form.veiculo.errors }}</div>{% endif %}
+              <div class="form-text text-muted">Selecione o cliente primeiro</div>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-semibold">Status</label>
+              {{ form.status }}
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-semibold">Data de Saída</label>
+              {{ form.data_saida }}
+            </div>
+            <div class="col-12">
+              <label class="form-label fw-semibold">Descrição do Serviço *</label>
+              {{ form.descricao_servico }}
+            </div>
+            <div class="col-12">
+              <label class="form-label fw-semibold">Observações</label>
+              {{ form.observacoes }}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PEÇAS -->
+      <div class="card border-0 shadow-sm mb-3">
+        <div class="card-header d-flex align-items-center justify-content-between" style="background:#2E75B6;">
+          <span class="text-white fw-semibold"><i class="bi bi-gear me-2"></i>Peças Utilizadas</span>
+          <button type="button" class="btn btn-sm btn-light" id="add-peca">
+            <i class="bi bi-plus-circle me-1"></i>Adicionar peça
+          </button>
+        </div>
+        <div class="card-body" id="pecas-container">
+          {{ formset_peca.management_form }}
+          {% for peca_form in formset_peca %}
+          <div class="formset-item peca-row">
+            {% if peca_form.instance.pk %}{{ peca_form.id }}{% endif %}
+            <div class="row g-2 align-items-end">
+              <div class="col-md-5">
+                <label class="form-label small">Peça</label>
+                {{ peca_form.peca }}
+              </div>
+              <div class="col-md-2">
+                <label class="form-label small">Quantidade</label>
+                {{ peca_form.quantidade }}
+              </div>
+              <div class="col-md-3">
+                <label class="form-label small">Valor Unit. (R$)</label>
+                {{ peca_form.valor_unitario }}
+              </div>
+              <div class="col-md-2 d-flex align-items-end">
+                {% if formset_peca.can_delete %}
+                <div class="form-check">
+                  {{ peca_form.DELETE }}
+                  <label class="form-check-label text-danger small">Remover</label>
+                </div>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+
+      <!-- MÃO DE OBRA -->
+      <div class="card border-0 shadow-sm mb-3">
+        <div class="card-header d-flex align-items-center justify-content-between" style="background:#2E75B6;">
+          <span class="text-white fw-semibold"><i class="bi bi-person-badge me-2"></i>Mão de Obra</span>
+          <button type="button" class="btn btn-sm btn-light" id="add-mo">
+            <i class="bi bi-plus-circle me-1"></i>Adicionar serviço
+          </button>
+        </div>
+        <div class="card-body" id="mo-container">
+          {{ formset_mo.management_form }}
+          {% for mo_form in formset_mo %}
+          <div class="formset-item mo-row">
+            {% if mo_form.instance.pk %}{{ mo_form.id }}{% endif %}
+            <div class="row g-2 align-items-end">
+              <div class="col-md-3">
+                <label class="form-label small">Mecânico</label>
+                {{ mo_form.mecanico }}
+              </div>
+              <div class="col-md-4">
+                <label class="form-label small">Tipo de Serviço</label>
+                {{ mo_form.tipo_servico }}
+              </div>
+              <div class="col-md-2">
+                <label class="form-label small">Horas</label>
+                {{ mo_form.horas_trabalhadas }}
+              </div>
+              <div class="col-md-2">
+                <label class="form-label small">R$/Hora</label>
+                {{ mo_form.valor_hora }}
+              </div>
+              <div class="col-md-1 d-flex align-items-end">
+                {% if formset_mo.can_delete %}
+                <div class="form-check">
+                  {{ mo_form.DELETE }}
+                  <label class="form-check-label text-danger small">Del</label>
+                </div>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+
+    <!-- Sidebar do formulário -->
+    <div class="col-lg-4">
+      <div class="card border-0 shadow-sm sticky-top" style="top:80px">
+        <div class="card-body">
+          <div class="d-grid gap-2">
+            <button type="submit" class="btn btn-orange btn-lg">
+              <i class="bi bi-save me-2"></i>Salvar OS
+            </button>
+            {% if ordem %}
+            <a href="{% url 'imprimir_os_pdf' ordem.pk %}" class="btn btn-primary-of" target="_blank">
+              <i class="bi bi-printer me-2"></i>Imprimir PDF
+            </a>
+            {% endif %}
+            <a href="{% url 'lista_ordens' %}" class="btn btn-outline-secondary">Cancelar</a>
+          </div>
+          <hr>
+          <div class="small text-muted">
+            <i class="bi bi-info-circle me-1"></i>
+            O valor unitário das peças e o valor/hora dos mecânicos são preenchidos automaticamente.
+            Você pode alterar se necessário.
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</form>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// ── AJAX: carregar veículos quando cliente mudar ──────────────────────────
+document.getElementById('id_cliente').addEventListener('change', function () {
+  const clienteId = this.value;
+  const veiculoSel = document.getElementById('id_veiculo');
+  veiculoSel.innerHTML = '<option value="">---------</option>';
+  if (!clienteId) return;
+  fetch(`/ordens/ajax/veiculos/?cliente_id=${clienteId}`)
+    .then(r => r.json())
+    .then(data => {
+      data.veiculos.forEach(v => {
+        const opt = document.createElement('option');
+        opt.value = v.id;
+        opt.textContent = `${v.descricao} — ${v.placa}`;
+        veiculoSel.appendChild(opt);
+      });
+    });
+});
+
+// ── AJAX: preencher valor unitário da peça ──────────────────────────────
+document.addEventListener('change', function (e) {
+  if (e.target.classList.contains('peca-select')) {
+    const pecaId = e.target.value;
+    const row    = e.target.closest('.peca-row');
+    const valInput = row.querySelector('input[id$="valor_unitario"]');
+    if (!pecaId || !valInput) return;
+    fetch(`/ordens/ajax/peca-valor/?peca_id=${pecaId}`)
+      .then(r => r.json())
+      .then(data => { valInput.value = data.valor.toFixed(2); });
+  }
+
+  // AJAX: preencher valor/hora do mecânico
+  if (e.target.classList.contains('mecanico-select')) {
+    const mecId  = e.target.value;
+    const row    = e.target.closest('.mo-row');
+    const valInput = row.querySelector('input[id$="valor_hora"]');
+    if (!mecId || !valInput) return;
+    fetch(`/ordens/ajax/mecanico-valor/?mecanico_id=${mecId}`)
+      .then(r => r.json())
+      .then(data => { valInput.value = data.valor.toFixed(2); });
+  }
+});
+
+// ── Adicionar nova linha de peça dinamicamente ──────────────────────────
+function addFormsetRow(containerId, prefix, templateRow) {
+  const container = document.getElementById(containerId);
+  const totalInput = document.querySelector(`#id_${prefix}-TOTAL_FORMS`);
+  const idx = parseInt(totalInput.value);
+
+  const newRow = templateRow.cloneNode(true);
+  newRow.innerHTML = newRow.innerHTML.replaceAll(`${prefix}-0-`, `${prefix}-${idx}-`);
+  newRow.querySelectorAll('input:not([type=hidden])').forEach(i => i.value = '');
+  newRow.querySelectorAll('select').forEach(s => s.selectedIndex = 0);
+
+  container.appendChild(newRow);
+  totalInput.value = idx + 1;
+}
+
+document.getElementById('add-peca').addEventListener('click', function () {
+  const tmpl = document.querySelector('#pecas-container .peca-row');
+  if (tmpl) addFormsetRow('pecas-container', 'pecas', tmpl);
+});
+
+document.getElementById('add-mo').addEventListener('click', function () {
+  const tmpl = document.querySelector('#mo-container .mo-row');
+  if (tmpl) addFormsetRow('mo-container', 'mo', tmpl);
+});
+</script>
+{% endblock %}
