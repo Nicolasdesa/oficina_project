@@ -60,15 +60,11 @@ DATABASES = {
     'default': {
         'ENGINE': 'mssql',
         'NAME': 'OficinaBD',
-        'USER': 'sa',                   # ou Windows Auth: deixe em branco
-        'PASSWORD': 'SuaSenha123',      # ajuste aqui
         'HOST': 'localhost',
         'PORT': '1433',
         'OPTIONS': {
             'driver': 'ODBC Driver 17 for SQL Server',
-            # Para autenticação Windows, descomente a linha abaixo
-            # e remova USER/PASSWORD:
-            # 'trusted_connection': 'yes',
+            'trusted_connection': 'yes',
         },
     }
 }
