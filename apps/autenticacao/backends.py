@@ -8,8 +8,12 @@ from django.contrib.auth.hashers import check_password, make_password
 from django.contrib.auth.models import User as DjangoUser
 from django.utils import timezone
 
-from .models import Usuario
+from django.contrib.auth.signals import user_logged_in
+from django.contrib.auth.models import update_last_login
+user_logged_in.disconnect(update_last_login)
 
+from .models import Usuario
+from .forms import LoginForm, UsuarioForm, AlterarSenhaForm
 
 class SQLServerBackend(BaseBackend):
     """
